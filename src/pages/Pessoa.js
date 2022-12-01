@@ -1,34 +1,35 @@
 import classNames from 'classnames';
+import {useFormik} from 'formik';
 import {Button} from 'primereact/button';
 import {Column} from 'primereact/column';
 import {DataTable} from 'primereact/datatable';
 import {Dialog} from 'primereact/dialog';
 import {Dropdown} from 'primereact/dropdown';
-import {InputNumber} from 'primereact/inputnumber';
+import {InputMask} from 'primereact/inputmask';
 import {InputText} from 'primereact/inputtext';
-import {InputTextarea} from 'primereact/inputtextarea';
+import {MultiSelect} from 'primereact/multiselect';
 import {Toast} from 'primereact/toast';
 import {Toolbar} from 'primereact/toolbar';
 import React, {useEffect, useRef, useState} from 'react';
-import {Link} from 'react-router-dom';
-import {CategoriaService} from '../service/CategoriaService';
-import {MarcaService} from '../service/MarcaService';
-import {ProdutoService} from '../service/ProdutoService';
+import {CidadeService} from '../service/CidadeService';
+import {PermissaoService} from '../service/PermissaoService';
+import {PessoaService} from '../service/PessoaService';
+import ColunaOpcoes from "../components/ColunaOpcoes";
 
-
-const Produto = () => {
+const Pessoa = () => {
     let objetoNovo = {
         nome: '',
-        marca: '',
-        categoria: '',
-        descricao: '',
-        valorCusto: '',
-        valorVenda: ''
+        cidade: null,
+        cpf: '',
+        email: '',
+        endereco: '',
+        cep: '',
+        permissaoPessoas: []
     };
 
     const [objetos, setObjetos] = useState(null);
-    const [marcas, setMarcas] = useState(null);
-    const [categorias, setCategorias] = useState(null);
+    const [cidades, setCidades] = useState(null);
+    const [permissoes, setPermissoes] = useState(null);
     const [objetoDialog, setObjetoDialog] = useState(false);
     const [objetoDeleteDialog, setObjetoDeleteDialog] = useState(false);
     const [objeto, setObjeto] = useState(objetoNovo);
@@ -36,18 +37,51 @@ const Produto = () => {
     const [globalFilter, setGlobalFilter] = useState(null);
     const toast = useRef(null);
     const dt = useRef(null);
-    const objetoService = new ProdutoService();
-    const marcaService = new MarcaService();
-    const categoriaService = new CategoriaService();
+    const objetoService = new PessoaService();
+    const cidadeService = new CidadeService();
+    const permissaoService = new PermissaoService();
+
+
+    const formik = useFormik({
+        enableReinitialize: true,
+        initialValues: objeto,
+        validate: (data) => {
+            let errors = {};
+
+            if (!data.nome) {
+                errors.nome = 'Nome é obrigatório';
+            }
+
+            if (!data.email) {
+                errors.email = 'Email é obrigatório';
+            } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(data.email)) {
+                errors.email = 'Email é inválido. Exemplo: jose@gmail.com';
+            }
+
+            if (!data.cpf) {
+                errors.cpf = 'CPF é obrigatório';
+            }
+
+            return errors;
+        },
+        onSubmit: (data) => {
+            setObjeto(data);
+            saveObjeto();
+            formik.resetForm();
+        }
+    });
 
     useEffect(() => {
-        marcaService.listarTodos().then(res => {
-            setMarcas(res.data)
-
+        cidadeService.listarTodos().then(res => {
+            setCidades(res.data)
         });
-        categoriaService.listarTodos().then(res => {
-            setCategorias(res.data)
 
+        permissaoService.listarTodos().then(res => {
+            let permissoesTemporarias = [];
+            res.data.forEach(element => {
+                permissoesTemporarias.push({permissao: element});
+            });
+            setPermissoes(permissoesTemporarias);
         });
     }, []);
 
@@ -76,17 +110,16 @@ const Produto = () => {
 
     const saveObjeto = () => {
         setSubmitted(true);
-        console.log(objeto);
 
         if (objeto.nome.trim()) {
-            let _objeto = {...objeto};
+            let _objeto = formik.values;
             if (objeto.id) {
-                objetoService.editar(_objeto).then(data => {
+                objetoService.alterar(_objeto).then(data => {
                     toast.current.show({severity: 'success', summary: 'Sucesso', detail: 'Alterado com Sucesso', life: 3000});
                     setObjetos(null);
                 });
             } else {
-                objetoService.salvar(_objeto).then(data => {
+                objetoService.inserir(_objeto).then(data => {
                     toast.current.show({severity: 'success', summary: 'Sucesso', detail: 'Inserido com Sucesso', life: 3000});
                     setObjetos(null);
                 });
@@ -107,7 +140,7 @@ const Produto = () => {
     }
 
     const deleteObjeto = () => {
-        objetoService.deletar(objeto.id).then(data => {
+        objetoService.excluir(objeto.id).then(data => {
             toast.current.show({severity: 'success', summary: 'Sucesso', detail: 'Removido', life: 3000});
 
             setObjetos(null);
@@ -116,13 +149,17 @@ const Produto = () => {
     }
 
     const onInputChange = (e, name) => {
-        console.log(e.target.value);
         const val = (e.target && e.target.value) || '';
         let _objeto = {...objeto};
         _objeto[`${name}`] = val;
 
         setObjeto(_objeto);
     }
+
+    const isFormFieldValid = (name) => !!(formik.touched[name] && formik.errors[name]);
+    const getFormErrorMessage = (name) => {
+        return isFormFieldValid(name) && <small className="p-error">{formik.errors[name]}</small>;
+    };
 
     const leftToolbarTemplate = () => {
         return (
@@ -152,40 +189,30 @@ const Produto = () => {
         );
     }
 
-    const descricaoBodyTemplate = (rowData) => {
+    const emailBodyTemplate = (rowData) => {
         return (
             <>
-                <span className="p-column-title">Descrição</span>
-                {rowData.descricao}
+                <span className="p-column-title">Email</span>
+                {rowData.email}
             </>
         );
     }
 
-    const valorCustoBodyTemplate = (rowData) => {
+    const documentoBodyTemplate = (rowData) => {
         return (
             <>
-                <span className="p-column-title">Valor de Custo</span>
-                {rowData.valorCusto}
+                <span className="p-column-title">Documento</span>
+                {rowData.cpf}
             </>
         );
     }
 
-    const valorVendaBodyTemplate = (rowData) => {
+    const enderecoBodyTemplate = (rowData) => {
         return (
             <>
-                <span className="p-column-title">Valor de Venda</span>
-                {rowData.valorVenda}
+                <span className="p-column-title">Endereço</span>
+                {rowData.endereco}
             </>
-        );
-    }
-
-    const actionBodyTemplate = (rowData) => {
-        return (
-            <div className="actions">
-                <Link to={{pathname: '/produtoImagens/' + rowData.id}}> <Button icon="pi pi-image" className="p-button-rounded p-button-primary mr-2"/></Link>
-                <Button icon="pi pi-pencil" className="p-button-rounded p-button-success mr-2" onClick={() => editObjeto(rowData)}/>
-                <Button icon="pi pi-trash" className="p-button-rounded p-button-danger mt-2" onClick={() => confirmDeleteObjeto(rowData)}/>
-            </div>
         );
     }
 
@@ -202,7 +229,7 @@ const Produto = () => {
     const objetoDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={hideDialog}/>
-            <Button label="Salvar" icon="pi pi-check" className="p-button-text" onClick={saveObjeto}/>
+            <Button type="submit" form="formularioPessoa" label="Salvar" icon="pi pi-check" className="p-button-text"/>
         </>
     );
 
@@ -227,49 +254,60 @@ const Produto = () => {
                                globalFilter={globalFilter} emptyMessage="Sem objetos cadastrados." header={header} responsiveLayout="scroll">
                         <Column field="id" header="ID" sortable body={idBodyTemplate} headerStyle={{width: '14%', minWidth: '10rem'}}></Column>
                         <Column field="nome" header="Nome" sortable body={nomeBodyTemplate} headerStyle={{width: '14%', minWidth: '10rem'}}></Column>
-                        <Column field="descricao" header="Descrição" sortable body={descricaoBodyTemplate} headerStyle={{width: '14%', minWidth: '10rem'}}></Column>
-                        <Column field="valorCusto" header="Valor de Custo" sortable body={valorCustoBodyTemplate} headerStyle={{width: '14%', minWidth: '10rem'}}></Column>
-                        <Column field="valorVenda" header="Valor de Venda" sortable body={valorVendaBodyTemplate} headerStyle={{width: '14%', minWidth: '10rem'}}></Column>
-                        <Column body={actionBodyTemplate}></Column>
+                        <Column field="email" header="Email" sortable body={emailBodyTemplate} headerStyle={{width: '14%', minWidth: '10rem'}}></Column>
+                        <Column field="cpf" header="Documento" sortable body={documentoBodyTemplate} headerStyle={{width: '14%', minWidth: '10rem'}}></Column>
+                        <Column field="endereco" header="Endereço" sortable body={enderecoBodyTemplate} headerStyle={{width: '14%', minWidth: '10rem'}}></Column>
+                        <Column body={rowData => {
+                            return <ColunaOpcoes rowData={rowData} editObjeto={editObjeto} confirmDeleteObjeto={confirmDeleteObjeto}/>
+                        }}></Column>
                     </DataTable>
 
                     <Dialog visible={objetoDialog} style={{width: '450px'}} header="Cadastrar/Editar" modal className="p-fluid" footer={objetoDialogFooter} onHide={hideDialog}>
-                        <div className="field">
-                            <label htmlFor="nome">Nome</label>
-                            <InputText id="nome" value={objeto.nome} onChange={(e) => onInputChange(e, 'nome')} required autoFocus className={classNames({'p-invalid': submitted && !objeto.nome})}/>
-                            {submitted && !objeto.nome && <small className="p-invalid">Nome é Obrigatório.</small>}
-                        </div>
+                        <form id="formularioPessoa" onSubmit={formik.handleSubmit}>
+                            <div className="field">
+                                <label htmlFor="nome">Nome*</label>
+                                <InputText id="nome" value={formik.values.nome} onChange={formik.handleChange} autoFocus className={classNames({'p-invalid': isFormFieldValid('nome')})}/>
+                                {getFormErrorMessage('nome')}
+                            </div>
 
-                        <div className="field">
-                            <label htmlFor="descricao">Descrição</label>
-                            <InputTextarea id="descricao" value={objeto.descricao} onChange={(e) => onInputChange(e, 'descricao')}/>
-                        </div>
+                            <div className="field">
+                                <label htmlFor="cpf">CPF*</label>
+                                <InputMask mask="999.999.999-99" id="cpf" value={formik.values.cpf} onChange={formik.handleChange} className={classNames({'p-invalid': isFormFieldValid('cpf')})}/>
+                                {getFormErrorMessage('cpf')}
+                            </div>
 
-                        <div className="field">
-                            <label htmlFor="marca">Marca</label>
-                            <Dropdown optionLabel="nome" value={objeto.marca} options={marcas} filter onChange={(e) => onInputChange(e, 'marca')} placeholder="Selecione uma Marca"/>
-                        </div>
+                            <div className="field">
+                                <label htmlFor="email">E-mail*</label>
+                                <InputText id="email" value={formik.values.email} onChange={formik.handleChange} className={classNames({'p-invalid': isFormFieldValid('email')})}/>
+                                {getFormErrorMessage('email')}
+                            </div>
 
-                        <div className="field">
-                            <label htmlFor="categoria">Categoria</label>
-                            <Dropdown optionLabel="nome" value={objeto.categoria} options={categorias} filter onChange={(e) => onInputChange(e, 'categoria')} placeholder="Selecione uma Categoria"/>
-                        </div>
+                            <div className="field">
+                                <label htmlFor="cep">CEP</label>
+                                <InputMask mask="99999-999" id="cep" value={formik.values.cep} onChange={formik.handleChange}/>
+                            </div>
 
-                        <div className="field">
-                            <label htmlFor="valorCusto">Valor de Custo</label>
-                            <InputNumber mode="currency" currency="BRL" locale="pt-BT" id="valorCusto" value={objeto.valorCusto} onValueChange={(e) => onInputChange(e, 'valorCusto')}/>
-                        </div>
+                            <div className="field">
+                                <label htmlFor="endereco">Endereço</label>
+                                <InputText id="endereco" value={formik.values.endereco} onChange={formik.handleChange}/>
+                            </div>
 
-                        <div className="field">
-                            <label htmlFor="valorVenda">Valor de Venda</label>
-                            <InputNumber mode="currency" currency="BRL" locale="pt-BT" id="valorVenda" value={objeto.valorVenda} onValueChange={(e) => onInputChange(e, 'valorVenda')}/>
-                        </div>
+                            <div className="field">
+                                <label htmlFor="cidade">Cidade</label>
+                                <Dropdown id="cidade" name="cidade" optionLabel="nome" value={formik.values.cidade} options={cidades} filter onChange={formik.handleChange} placeholder="Selecione uma Cidade"/>
+                            </div>
+
+                            <div className="field">
+                                <label htmlFor="permissaoPessoas">Permissões</label>
+                                <MultiSelect dataKey="permissao.id" id="permissaoPessoas" value={formik.values.permissaoPessoas} options={permissoes} onChange={formik.handleChange} optionLabel="permissao.nome" placeholder="Selecione as Permissões"/>
+                            </div>
+                        </form>
                     </Dialog>
 
                     <Dialog visible={objetoDeleteDialog} style={{width: '450px'}} header="Confirmação" modal footer={deleteObjetoDialogFooter} onHide={hideDeleteObjetoDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{fontSize: '2rem'}}/>
-                            {objeto && <span>Deseja excluir o registro ?</span>}
+                            {objeto && <span>Deseja Excluir?</span>}
                         </div>
                     </Dialog>
                 </div>
@@ -282,4 +320,4 @@ const comparisonFn = function (prevProps, nextProps) {
     return prevProps.location.pathname === nextProps.location.pathname;
 };
 
-export default React.memo(Produto, comparisonFn);
+export default React.memo(Pessoa, comparisonFn);

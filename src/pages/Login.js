@@ -29,8 +29,8 @@ const Login = () => {
             <Toast ref={toast} />
             <div className="surface-card p-4 shadow-2 border-round w-full lg:w-6">
                 <div className="text-center mb-5">
-                    <img src="images/online-shopping-rafiki.svg" alt="hyper" height="160" className="mb-3" />
-                    <div className="text-900 text-3xl font-medium mb-3">Bem Vindo de volta!</div>
+                    <img src="images/blackmoon.png" alt="hyper" height="160" className="mb-3" />
+                    <div className="text-900 text-3xl font-medium mb-3">Eai, Seja Bem vindo!</div>
                 </div>
 
                 <div>
@@ -44,7 +44,7 @@ const Login = () => {
                         <button className="p-link font-medium no-underline ml-2 text-blue-500 text-right cursor-pointer" onClick={() => telaSolicitarCodigo()}>Recuperar senha</button>
                     </div>
 
-                    <Button onClick={() => fazerLogin()} label="Sign In" icon="pi pi-user" className="w-full" />
+                    <Button onClick={() => fazerLogin()} label="Entrar" icon="pi pi-user" className="w-full" />
                 </div>
             </div>
         </div>

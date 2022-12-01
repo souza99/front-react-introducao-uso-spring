@@ -15,7 +15,7 @@ export class UsuarioService {
         return axios.put(this.url + '/editar/' + objeto.id, objeto);
     }
 
-    excluir(id) {
-        return axios.delete(this.url + '/excluir/' + id);
+    deletar(id) {
+        return axios.delete(this.url + '/deletar/' + id);
     }
 }

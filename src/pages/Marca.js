@@ -82,7 +82,7 @@ const Marca = () => {
     }
 
     const deleteObjeto = () => {
-        objetoService.excluir(objeto.id).then(data => {
+        objetoService.deletar(objeto.id).then(data => {
             toast.current.show({severity: 'success', summary: 'Sucesso', detail: 'Removido', life: 3000});
 
             setObjetos(null);
@@ -182,7 +182,7 @@ const Marca = () => {
                     <Dialog visible={objetoDeleteDialog} style={{width: '450px'}} header="Confirmação" modal footer={deleteObjetoDialogFooter} onHide={hideDeleteObjetoDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{fontSize: '2rem'}}/>
-                            {objeto && <span>Deseja Excluir?</span>}
+                            {objeto && <span>Deseja excluir o registro ?</span>}
                         </div>
                     </Dialog>
                 </div>

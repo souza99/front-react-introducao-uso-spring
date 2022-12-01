@@ -55,7 +55,7 @@ export class ProdutoService {
         return this.axiosInstance.put(this.url + '/editar/' + objeto.id, objeto);
     }
 
-    excluir(id) {
-        return this.axiosInstance.delete(this.url + '/excluir/' + id);
+    deletar(id) {
+        return this.axiosInstance.delete(this.url + '/deletar/' + id);
     }
 }

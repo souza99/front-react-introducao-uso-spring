@@ -56,7 +56,7 @@ export class ProdutoImagensService {
         return this.axiosInstance.get(this.url + "/produto/" + idProduto);
     }
 
-    excluir(idProduto) {
-        return this.axiosInstance.delete(this.url + "/excluir/" + idProduto);
+    deletar(idProduto) {
+        return this.axiosInstance.delete(this.url + "/deletar/" + idProduto);
     }
 }

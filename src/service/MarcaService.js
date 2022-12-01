@@ -51,7 +51,7 @@ export class MarcaService {
         return this.axiosInstance.put(this.url + '/editar/' + objeto.id, objeto);
     }
 
-    excluir(id) {
+    deletar(id) {
         return this.axiosInstance.delete(this.url + '/deletar/' + id);
     }
 }

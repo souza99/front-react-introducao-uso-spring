@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
-import { CSSTransition } from 'react-transition-group';
+import React, {useState} from 'react';
+import {NavLink} from 'react-router-dom';
+import {CSSTransition} from 'react-transition-group';
 import classNames from 'classnames';
-import { Ripple } from "primereact/ripple";
-import { Badge } from 'primereact/badge';
+import {Ripple} from "primereact/ripple";
+import {Badge} from 'primereact/badge';
 
 const AppSubmenu = (props) => {
 
@@ -18,7 +18,7 @@ const AppSubmenu = (props) => {
 
         //execute command
         if (item.command) {
-            item.command({ originalEvent: event, item: item });
+            item.command({originalEvent: event, item: item});
         }
 
         if (index === activeIndex)
@@ -43,7 +43,7 @@ const AppSubmenu = (props) => {
 
     const renderLinkContent = (item) => {
         let submenuIcon = item.items && <i className="pi pi-fw pi-angle-down menuitem-toggle-icon"></i>;
-        let badge = item.badge && <Badge value={item.badge} />
+        let badge = item.badge && <Badge value={item.badge}/>
 
         return (
             <React.Fragment>
@@ -51,7 +51,7 @@ const AppSubmenu = (props) => {
                 <span>{item.label}</span>
                 {submenuIcon}
                 {badge}
-                <Ripple />
+                <Ripple/>
             </React.Fragment>
         );
     }
@@ -76,14 +76,14 @@ const AppSubmenu = (props) => {
 
     let items = props.items && props.items.map((item, i) => {
         let active = activeIndex === i;
-        let styleClass = classNames(item.badgeStyleClass, { 'layout-menuitem-category': props.root, 'active-menuitem': active && !item.to });
+        let styleClass = classNames(item.badgeStyleClass, {'layout-menuitem-category': props.root, 'active-menuitem': active && !item.to});
 
         if (props.root) {
             return (
                 <li className={styleClass} key={i} role="none">
                     {props.root === true && <React.Fragment>
                         <div className="layout-menuitem-root-text" aria-label={item.label}>{item.label}</div>
-                        <AppSubmenu items={item.items} onMenuItemClick={props.onMenuItemClick} />
+                        <AppSubmenu items={item.items} onMenuItemClick={props.onMenuItemClick}/>
                     </React.Fragment>}
                 </li>
             );
@@ -91,8 +91,8 @@ const AppSubmenu = (props) => {
             return (
                 <li className={styleClass} key={i} role="none">
                     {renderLink(item, i)}
-                    <CSSTransition classNames="layout-submenu-wrapper" timeout={{ enter: 1000, exit: 450 }} in={active} unmountOnExit>
-                        <AppSubmenu items={item.items} onMenuItemClick={props.onMenuItemClick} />
+                    <CSSTransition classNames="layout-submenu-wrapper" timeout={{enter: 1000, exit: 450}} in={active} unmountOnExit>
+                        <AppSubmenu items={item.items} onMenuItemClick={props.onMenuItemClick}/>
                     </CSSTransition>
                 </li>
             );
@@ -106,7 +106,7 @@ export const AppMenu = (props) => {
 
     return (
         <div className="layout-menu-container">
-            <AppSubmenu items={props.model} className="layout-menu" onMenuItemClick={props.onMenuItemClick} root={true} role="menu" />
+            <AppSubmenu items={props.model} className="layout-menu" onMenuItemClick={props.onMenuItemClick} root={true} role="menu"/>
         </div>
     );
 }
