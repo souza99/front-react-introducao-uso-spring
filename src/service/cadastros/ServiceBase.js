@@ -32,7 +32,7 @@ export class ServiceBase {
         }, (erro) => {
             console.log(erro.response.status);
             if (erro.response.status == 401) {
-                if (!erro.request.response.includes("pessoa-gerenciamento/login")) {
+                if (!erro.request.response.includes("gerenciamento-usuario/login")) {
                     new LoginService().sair();
                     window.location.href = "/";
                 }

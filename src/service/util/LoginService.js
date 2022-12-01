@@ -6,7 +6,7 @@ export class LoginService extends ServiceBase {
     CHAVE_TOKEN = "@token_loja";
 
 constructor(){
-    super("pessoa-gerenciamento");
+    super("gerenciamento-usuario");
 }
 
 login(email, senha, mensagemErro){
