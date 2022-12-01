@@ -1,26 +1,33 @@
-import React, { useState, useEffect, useRef } from 'react';
 import classNames from 'classnames';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
-import { FileUpload } from 'primereact/fileupload';
-import { Rating } from 'primereact/rating';
-import { Toolbar } from 'primereact/toolbar';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { RadioButton } from 'primereact/radiobutton';
-import { InputNumber } from 'primereact/inputnumber';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
+import { Dropdown } from 'primereact/dropdown';
+import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
-import { EstadoService } from '../../service/cadastros/EstadoService';
+import { InputTextarea } from 'primereact/inputtextarea';
+import { Toast } from 'primereact/toast';
+import { Toolbar } from 'primereact/toolbar';
+import React, { useEffect, useRef, useState } from 'react';
+import { CategoriaService } from '../service/CategoriaService';
+import { FabricanteService } from '../service/FabricanteService';
+import { ProdutoService } from '../service/ProdutoService';
 
-const Estado = () => {
+
+const Produto = () => {
     let objetoNovo = {
         nome: '',
-        sigla: ''
+        fabricante: '',
+        categoria: '',
+        descricao: '',
+        valorCusto: '',
+        valorVenda: ''
     };
 
     const [objetos, setObjetos] = useState(null);
+    const [fabricantes, setFabricantes] = useState(null);
+    const [categorias, setCategorias] = useState(null);
     const [objetoDialog, setObjetoDialog] = useState(false);
     const [objetoDeleteDialog, setObjetoDeleteDialog] = useState(false);
     const [objeto, setObjeto] = useState(objetoNovo);
@@ -28,13 +35,25 @@ const Estado = () => {
     const [globalFilter, setGlobalFilter] = useState(null);
     const toast = useRef(null);
     const dt = useRef(null);
-    const objetoService = new EstadoService();
+    const objetoService = new ProdutoService();
+    const fabricanteService = new FabricanteService();
+    const categoriaService = new CategoriaService();
+
+    useEffect(() => {
+        fabricanteService.listarTodos().then(res => {
+            setFabricantes(res.data)
+
+        });
+        categoriaService.listarTodos().then(res => {
+            setCategorias(res.data)
+
+        });
+    }, []);
 
     useEffect(() => {
         if (objetos == null) {
             objetoService.listarTodos().then(res => {
                 setObjetos(res.data)
-
             });
         }
     }, [objetos]);
@@ -54,10 +73,9 @@ const Estado = () => {
         setObjetoDeleteDialog(false);
     }
 
-
-
     const saveObjeto = () => {
         setSubmitted(true);
+        console.log(objeto);
 
         if (objeto.nome.trim()) {
             let _objeto = { ...objeto };
@@ -66,13 +84,11 @@ const Estado = () => {
                     toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Alterado com Sucesso', life: 3000 });
                     setObjetos(null);
                 });
-            }
-            else {
+            } else {
                 objetoService.inserir(_objeto).then(data => {
                     toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Inserido com Sucesso', life: 3000 });
                     setObjetos(null);
                 });
-
             }
             setObjetoDialog(false);
             setObjeto(objetoNovo);
@@ -90,17 +106,17 @@ const Estado = () => {
     }
 
     const deleteObjeto = () => {
-    
         objetoService.excluir(objeto.id).then(data => {
             toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Removido', life: 3000 });
 
             setObjetos(null);
             setObjetoDeleteDialog(false);
-         
+
         });
     }
 
     const onInputChange = (e, name) => {
+        console.log(e.target.value);
         const val = (e.target && e.target.value) || '';
         let _objeto = { ...objeto };
         _objeto[`${name}`] = val;
@@ -112,8 +128,7 @@ const Estado = () => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="Novo Estado" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
-
+                    <Button label="Adicionar Produto" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
                 </div>
             </React.Fragment>
         )
@@ -137,11 +152,29 @@ const Estado = () => {
         );
     }
 
-    const siglaBodyTemplate = (rowData) => {
+    const descricaoBodyTemplate = (rowData) => {
         return (
             <>
-                <span className="p-column-title">Sigla</span>
-                {rowData.sigla}
+                <span className="p-column-title">Descrição</span>
+                {rowData.descricao}
+            </>
+        );
+    }
+
+    const valorCustoBodyTemplate = (rowData) => {
+        return (
+            <>
+                <span className="p-column-title">Valor de Custo</span>
+                {rowData.valorCusto}
+            </>
+        );
+    }
+
+    const valorVendaBodyTemplate = (rowData) => {
+        return (
+            <>
+                <span className="p-column-title">Valor de Venda</span>
+                {rowData.valorVenda}
             </>
         );
     }
@@ -155,10 +188,9 @@ const Estado = () => {
         );
     }
 
-
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Estados Cadastrados</h5>
+            <h5 className="m-0">Registros Cadastrados</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar..." />
@@ -178,7 +210,7 @@ const Estado = () => {
             <Button label="Não" icon="pi pi-times" className="p-button-text" onClick={hideDeleteObjetoDialog} />
             <Button label="Sim" icon="pi pi-check" className="p-button-text" onClick={deleteObjeto} />
         </>
-    ); 
+    );
 
     return (
         <div className="grid crud-demo">
@@ -191,37 +223,53 @@ const Estado = () => {
                         dataKey="id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]} className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Mostrando {first} de {last}. Total de {totalRecords}"
-                        globalFilter={globalFilter} emptyMessage="Sem objetos cadastrados." header={header} responsiveLayout="scroll">                        
+                        globalFilter={globalFilter} emptyMessage="Sem objetos cadastrados." header={header} responsiveLayout="scroll">
                         <Column field="id" header="ID" sortable body={idBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
                         <Column field="nome" header="Nome" sortable body={nomeBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
-                        <Column field="sigla" header="Sigla" body={siglaBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
+                        <Column field="descricao" header="Descrição" sortable body={descricaoBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
+                        <Column field="valorCusto" header="Valor de Custo" sortable body={valorCustoBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
+                        <Column field="valorVenda" header="Valor de Venda" sortable body={valorVendaBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
                         <Column body={actionBodyTemplate}></Column>
                     </DataTable>
 
                     <Dialog visible={objetoDialog} style={{ width: '450px' }} header="Cadastrar/Editar" modal className="p-fluid" footer={objetoDialogFooter} onHide={hideDialog}>
-
                         <div className="field">
                             <label htmlFor="nome">Nome</label>
                             <InputText id="nome" value={objeto.nome} onChange={(e) => onInputChange(e, 'nome')} required autoFocus className={classNames({ 'p-invalid': submitted && !objeto.nome })} />
-                            {submitted && !objeto.name && <small className="p-invalid">Nome é Obrigatório.</small>}
+                            {submitted && !objeto.nome && <small className="p-invalid">Nome é Obrigatório.</small>}
                         </div>
+
                         <div className="field">
-                            <label htmlFor="sigla">Sigla</label>
-                            <InputText id="sigla" value={objeto.sigla} onChange={(e) => onInputChange(e, 'sigla')} required className={classNames({ 'p-invalid': submitted && !objeto.sigla })} />
-                            {submitted && !objeto.sigla && <small className="p-invalid">Sigla é Obrigatório.</small>}
+                            <label htmlFor="descricao">Descrição</label>
+                            <InputTextarea id="nome" value={objeto.descricao} onChange={(e) => onInputChange(e, 'descricao')} />
                         </div>
 
+                        <div className="field">
+                            <label htmlFor="fabricante">Fabricante</label>
+                            <Dropdown optionLabel="nome" value={objeto.fabricante} options={fabricantes} filter onChange={(e) => onInputChange(e, 'fabricante')} placeholder="Selecione um Fabricante" />
+                        </div>
 
+                        <div className="field">
+                            <label htmlFor="categoria">Categoria</label>
+                            <Dropdown optionLabel="nome" value={objeto.categoria} options={categorias} filter onChange={(e) => onInputChange(e, 'categoria')} placeholder="Selecione uma Categoria" />
+                        </div>
+
+                        <div className="field">
+                            <label htmlFor="valorCusto">Valor de Custo</label>
+                            <InputNumber mode="currency" currency="BRL" locale="pt-BT" id="valorCusto" value={objeto.valorCusto} onValueChange={(e) => onInputChange(e, 'valorCusto')} />
+                        </div>
+
+                        <div className="field">
+                            <label htmlFor="valorVenda">Valor de Venda</label>
+                            <InputNumber mode="currency" currency="BRL" locale="pt-BT" id="valorVenda" value={objeto.valorVenda} onValueChange={(e) => onInputChange(e, 'valorVenda')} />
+                        </div>
                     </Dialog>
-
                     <Dialog visible={objetoDeleteDialog} style={{ width: '450px' }} header="Confirmação" modal footer={deleteObjetoDialogFooter} onHide={hideDeleteObjetoDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                             {objeto && <span>Deseja Excluir?</span>}
                         </div>
                     </Dialog>
-
-
                 </div>
             </div>
         </div>
@@ -232,4 +280,4 @@ const comparisonFn = function (prevProps, nextProps) {
     return prevProps.location.pathname === nextProps.location.pathname;
 };
 
-export default React.memo(Estado, comparisonFn);
+export default React.memo(Produto, comparisonFn);

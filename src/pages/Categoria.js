@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -7,9 +7,9 @@ import { Button } from 'primereact/button';
 import { Toolbar } from 'primereact/toolbar';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import { PermissaoService } from '../../service/cadastros/PermissaoService';
+import { CategoriaService } from '../service/CategoriaService';
 
-const Permissao = () => {
+const Categoria = () => {
     let objetoNovo = {
         nome: ''
     };
@@ -22,13 +22,12 @@ const Permissao = () => {
     const [globalFilter, setGlobalFilter] = useState(null);
     const toast = useRef(null);
     const dt = useRef(null);
-    const objetoService = new PermissaoService();
+    const objetoService = new CategoriaService();
 
     useEffect(() => {
         if (objetos == null) {
             objetoService.listarTodos().then(res => {
                 setObjetos(res.data)
-
             });
         }
     }, [objetos]);
@@ -48,8 +47,6 @@ const Permissao = () => {
         setObjetoDeleteDialog(false);
     }
 
-
-
     const saveObjeto = () => {
         setSubmitted(true);
 
@@ -60,13 +57,11 @@ const Permissao = () => {
                     toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Alterado com Sucesso', life: 3000 });
                     setObjetos(null);
                 });
-            }
-            else {
+            } else {
                 objetoService.inserir(_objeto).then(data => {
                     toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Inserido com Sucesso', life: 3000 });
                     setObjetos(null);
                 });
-
             }
             setObjetoDialog(false);
             setObjeto(objetoNovo);
@@ -84,13 +79,11 @@ const Permissao = () => {
     }
 
     const deleteObjeto = () => {
-    
         objetoService.excluir(objeto.id).then(data => {
             toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Removido', life: 3000 });
 
             setObjetos(null);
             setObjetoDeleteDialog(false);
-         
         });
     }
 
@@ -106,8 +99,7 @@ const Permissao = () => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="Nova" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
-
+                    <Button label="Adicionar Categoria" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
                 </div>
             </React.Fragment>
         )
@@ -131,7 +123,6 @@ const Permissao = () => {
         );
     }
 
-
     const actionBodyTemplate = (rowData) => {
         return (
             <div className="actions">
@@ -140,7 +131,6 @@ const Permissao = () => {
             </div>
         );
     }
-
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
@@ -164,7 +154,7 @@ const Permissao = () => {
             <Button label="Não" icon="pi pi-times" className="p-button-text" onClick={hideDeleteObjetoDialog} />
             <Button label="Sim" icon="pi pi-check" className="p-button-text" onClick={deleteObjeto} />
         </>
-    ); 
+    );
 
     return (
         <div className="grid crud-demo">
@@ -177,7 +167,7 @@ const Permissao = () => {
                         dataKey="id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]} className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Mostrando {first} de {last}. Total de {totalRecords}"
-                        globalFilter={globalFilter} emptyMessage="Sem objetos cadastrados." header={header} responsiveLayout="scroll">                        
+                        globalFilter={globalFilter} emptyMessage="Sem objetos cadastrados." header={header} responsiveLayout="scroll">
                         <Column field="id" header="ID" sortable body={idBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
                         <Column field="nome" header="Nome" sortable body={nomeBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
                         <Column body={actionBodyTemplate}></Column>
@@ -190,7 +180,7 @@ const Permissao = () => {
                             <InputText id="nome" value={objeto.nome} onChange={(e) => onInputChange(e, 'nome')} required autoFocus className={classNames({ 'p-invalid': submitted && !objeto.nome })} />
                             {submitted && !objeto.name && <small className="p-invalid">Nome é Obrigatório.</small>}
                         </div>
-           
+
 
                     </Dialog>
 
@@ -200,8 +190,6 @@ const Permissao = () => {
                             {objeto && <span>Deseja Excluir?</span>}
                         </div>
                     </Dialog>
-
-
                 </div>
             </div>
         </div>
@@ -212,4 +200,4 @@ const comparisonFn = function (prevProps, nextProps) {
     return prevProps.location.pathname === nextProps.location.pathname;
 };
 
-export default React.memo(Permissao, comparisonFn);
+export default React.memo(Categoria, comparisonFn);

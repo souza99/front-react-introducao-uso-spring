@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
 import classNames from 'classnames';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
-import { Toolbar } from 'primereact/toolbar';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import { CategoriaService } from '../../service/cadastros/CategoriaService';
+import { Toast } from 'primereact/toast';
+import { Toolbar } from 'primereact/toolbar';
+import React, { useEffect, useRef, useState } from 'react';
+import { PermissaoService } from '../service/PermissaoService';
 
-const Categoria = () => {
+const Permissao = () => {
     let objetoNovo = {
         nome: ''
     };
@@ -22,13 +22,12 @@ const Categoria = () => {
     const [globalFilter, setGlobalFilter] = useState(null);
     const toast = useRef(null);
     const dt = useRef(null);
-    const objetoService = new CategoriaService();
+    const objetoService = new PermissaoService();
 
     useEffect(() => {
         if (objetos == null) {
             objetoService.listarTodos().then(res => {
                 setObjetos(res.data)
-
             });
         }
     }, [objetos]);
@@ -48,8 +47,6 @@ const Categoria = () => {
         setObjetoDeleteDialog(false);
     }
 
-
-
     const saveObjeto = () => {
         setSubmitted(true);
 
@@ -60,13 +57,11 @@ const Categoria = () => {
                     toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Alterado com Sucesso', life: 3000 });
                     setObjetos(null);
                 });
-            }
-            else {
+            } else {
                 objetoService.inserir(_objeto).then(data => {
                     toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Inserido com Sucesso', life: 3000 });
                     setObjetos(null);
                 });
-
             }
             setObjetoDialog(false);
             setObjeto(objetoNovo);
@@ -84,13 +79,12 @@ const Categoria = () => {
     }
 
     const deleteObjeto = () => {
-    
+
         objetoService.excluir(objeto.id).then(data => {
             toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Removido', life: 3000 });
 
             setObjetos(null);
             setObjetoDeleteDialog(false);
-         
         });
     }
 
@@ -106,8 +100,7 @@ const Categoria = () => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="Nova" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
-
+                    <Button label="Cadastrar Permissão" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
                 </div>
             </React.Fragment>
         )
@@ -131,7 +124,6 @@ const Categoria = () => {
         );
     }
 
-
     const actionBodyTemplate = (rowData) => {
         return (
             <div className="actions">
@@ -140,7 +132,6 @@ const Categoria = () => {
             </div>
         );
     }
-
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
@@ -164,7 +155,7 @@ const Categoria = () => {
             <Button label="Não" icon="pi pi-times" className="p-button-text" onClick={hideDeleteObjetoDialog} />
             <Button label="Sim" icon="pi pi-check" className="p-button-text" onClick={deleteObjeto} />
         </>
-    ); 
+    );
 
     return (
         <div className="grid crud-demo">
@@ -177,21 +168,18 @@ const Categoria = () => {
                         dataKey="id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]} className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Mostrando {first} de {last}. Total de {totalRecords}"
-                        globalFilter={globalFilter} emptyMessage="Sem objetos cadastrados." header={header} responsiveLayout="scroll">                        
+                        globalFilter={globalFilter} emptyMessage="Sem objetos cadastrados." header={header} responsiveLayout="scroll">
                         <Column field="id" header="ID" sortable body={idBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
                         <Column field="nome" header="Nome" sortable body={nomeBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
                         <Column body={actionBodyTemplate}></Column>
                     </DataTable>
 
                     <Dialog visible={objetoDialog} style={{ width: '450px' }} header="Cadastrar/Editar" modal className="p-fluid" footer={objetoDialogFooter} onHide={hideDialog}>
-
                         <div className="field">
                             <label htmlFor="nome">Nome</label>
-                            <InputText id="nome" value={objeto.nome} onChange={(e) => onInputChange(e, 'nome')} required autoFocus className={classNames({ 'p-invalid': submitted && !objeto.nome })} />
+                            <InputText id="nome" value={objeto.nome.toUpperCase()} onChange={(e) => onInputChange(e, 'nome')} required autoFocus className={classNames({ 'p-invalid': submitted && !objeto.nome })} />
                             {submitted && !objeto.name && <small className="p-invalid">Nome é Obrigatório.</small>}
                         </div>
-           
-
                     </Dialog>
 
                     <Dialog visible={objetoDeleteDialog} style={{ width: '450px' }} header="Confirmação" modal footer={deleteObjetoDialogFooter} onHide={hideDeleteObjetoDialog}>
@@ -200,8 +188,6 @@ const Categoria = () => {
                             {objeto && <span>Deseja Excluir?</span>}
                         </div>
                     </Dialog>
-
-
                 </div>
             </div>
         </div>
@@ -212,4 +198,4 @@ const comparisonFn = function (prevProps, nextProps) {
     return prevProps.location.pathname === nextProps.location.pathname;
 };
 
-export default React.memo(Categoria, comparisonFn);
+export default React.memo(Permissao, comparisonFn);

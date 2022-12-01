@@ -1,37 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import { useFormik } from 'formik';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
-import { Toolbar } from 'primereact/toolbar';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
-import { InputText } from 'primereact/inputtext';
-import { PessoaService } from '../../service/cadastros/PessoaService';
-import { CidadeService } from '../../service/cadastros/CidadeService';
-import { PermissaoService } from '../../service/cadastros/PermissaoService';
-import { Dropdown } from 'primereact/dropdown';
 import { InputMask } from 'primereact/inputmask';
+import { InputText } from 'primereact/inputtext';
 import { MultiSelect } from 'primereact/multiselect';
-
-
-//{nome:'Frank', permissaoPessoas:[{permissao:{id:55}}]}
+import { Toast } from 'primereact/toast';
+import { Toolbar } from 'primereact/toolbar';
+import React, { useEffect, useRef, useState } from 'react';
+import { PermissaoService } from '../service/PermissaoService';
+import ColunaOpcoes from "../components/ColunaOpcoes";
+import { UsuarioService } from "../service/UsuarioService";
 
 const Pessoa = () => {
-
     let objetoNovo = {
         nome: '',
-        cidade: null,
-        cpf: '',
+        documento: '',
         email: '',
         endereco: '',
         cep: '',
-        permissaoPessoas: []
+        permissaoUsuarios: []
     };
 
     const [objetos, setObjetos] = useState(null);
-    const [cidades, setCidades] = useState(null);
     const [permissoes, setPermissoes] = useState(null);
     const [objetoDialog, setObjetoDialog] = useState(false);
     const [objetoDeleteDialog, setObjetoDeleteDialog] = useState(false);
@@ -40,10 +33,8 @@ const Pessoa = () => {
     const [globalFilter, setGlobalFilter] = useState(null);
     const toast = useRef(null);
     const dt = useRef(null);
-    const objetoService = new PessoaService();
-    const cidadeService = new CidadeService();
+    const objetoService = new UsuarioService();
     const permissaoService = new PermissaoService();
-
 
 
     const formik = useFormik({
@@ -58,9 +49,12 @@ const Pessoa = () => {
 
             if (!data.email) {
                 errors.email = 'Email é obrigatório';
-            }
-            else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(data.email)) {
+            } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(data.email)) {
                 errors.email = 'Email é inválido. Exemplo: jose@gmail.com';
+            }
+
+            if (!data.documento) {
+                errors.documento = 'CPF é obrigatório';
             }
 
             return errors;
@@ -73,11 +67,6 @@ const Pessoa = () => {
     });
 
     useEffect(() => {
-        cidadeService.listarTodos().then(res => {
-            setCidades(res.data)
-
-        });
-
         permissaoService.listarTodos().then(res => {
             let permissoesTemporarias = [];
             res.data.forEach(element => {
@@ -91,7 +80,6 @@ const Pessoa = () => {
         if (objetos == null) {
             objetoService.listarTodos().then(res => {
                 setObjetos(res.data)
-
             });
         }
     }, [objetos]);
@@ -111,8 +99,6 @@ const Pessoa = () => {
         setObjetoDeleteDialog(false);
     }
 
-
-
     const saveObjeto = () => {
         setSubmitted(true);
 
@@ -123,13 +109,11 @@ const Pessoa = () => {
                     toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Alterado com Sucesso', life: 3000 });
                     setObjetos(null);
                 });
-            }
-            else {
+            } else {
                 objetoService.inserir(_objeto).then(data => {
                     toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Inserido com Sucesso', life: 3000 });
                     setObjetos(null);
                 });
-
             }
             setObjetoDialog(false);
             setObjeto(objetoNovo);
@@ -147,13 +131,11 @@ const Pessoa = () => {
     }
 
     const deleteObjeto = () => {
-
         objetoService.excluir(objeto.id).then(data => {
             toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Removido', life: 3000 });
 
             setObjetos(null);
             setObjetoDeleteDialog(false);
-
         });
     }
 
@@ -174,8 +156,7 @@ const Pessoa = () => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="Nova" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
-
+                    <Button label="Cadastrar Usuário" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
                 </div>
             </React.Fragment>
         )
@@ -199,16 +180,32 @@ const Pessoa = () => {
         );
     }
 
-
-    const actionBodyTemplate = (rowData) => {
+    const emailBodyTemplate = (rowData) => {
         return (
-            <div className="actions">
-                <Button icon="pi pi-pencil" className="p-button-rounded p-button-success mr-2" onClick={() => editObjeto(rowData)} />
-                <Button icon="pi pi-trash" className="p-button-rounded p-button-warning mt-2" onClick={() => confirmDeleteObjeto(rowData)} />
-            </div>
+            <>
+                <span className="p-column-title">Email</span>
+                {rowData.email}
+            </>
         );
     }
 
+    const documentoBodyTemplate = (rowData) => {
+        return (
+            <>
+                <span className="p-column-title">Documento</span>
+                {rowData.documento}
+            </>
+        );
+    }
+
+    const enderecoBodyTemplate = (rowData) => {
+        return (
+            <>
+                <span className="p-column-title">Endereço</span>
+                {rowData.endereco}
+            </>
+        );
+    }
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
@@ -248,7 +245,12 @@ const Pessoa = () => {
                         globalFilter={globalFilter} emptyMessage="Sem objetos cadastrados." header={header} responsiveLayout="scroll">
                         <Column field="id" header="ID" sortable body={idBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
                         <Column field="nome" header="Nome" sortable body={nomeBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
-                        <Column body={actionBodyTemplate}></Column>
+                        <Column field="email" header="Email" sortable body={emailBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
+                        <Column field="documento" header="Documento" sortable body={documentoBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
+                        <Column field="endereco" header="Endereço" sortable body={enderecoBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
+                        <Column body={rowData => {
+                            return <ColunaOpcoes rowData={rowData} editObjeto={editObjeto} confirmDeleteObjeto={confirmDeleteObjeto} />
+                        }}></Column>
                     </DataTable>
 
                     <Dialog visible={objetoDialog} style={{ width: '450px' }} header="Cadastrar/Editar" modal className="p-fluid" footer={objetoDialogFooter} onHide={hideDialog}>
@@ -260,8 +262,9 @@ const Pessoa = () => {
                             </div>
 
                             <div className="field">
-                                <label htmlFor="cpf">CPF*</label>
-                                <InputMask mask="999.999.999-99" id="cpf" value={formik.values.cpf} onChange={formik.handleChange} />
+                                <label htmlFor="documento">CPF*</label>
+                                <InputMask mask="999.999.999-99" id="documento" value={formik.values.documento} onChange={formik.handleChange} className={classNames({ 'p-invalid': isFormFieldValid('documento') })} />
+                                {getFormErrorMessage('documento')}
                             </div>
 
                             <div className="field">
@@ -281,13 +284,8 @@ const Pessoa = () => {
                             </div>
 
                             <div className="field">
-                                <label htmlFor="cidade">Cidade</label>
-                                <Dropdown id="cidade" name="cidade" optionLabel="nome" value={formik.values.cidade} options={cidades} filter onChange={formik.handleChange} placeholder="Selecione uma Cidade" />
-                            </div>
-
-                            <div className="field">
-                                <label htmlFor="permissaoPessoas">Permissões</label>
-                                <MultiSelect dataKey="permissao.id" id="permissaoPessoas" value={formik.values.permissaoPessoas} options={permissoes} onChange={formik.handleChange} optionLabel="permissao.nome" placeholder="Selecione as Permissões" />
+                                <label htmlFor="permissaoUsuarios">Permissões</label>
+                                <MultiSelect dataKey="permissao.id" id="permissaoUsuarios" value={formik.values.permissaoUsuarios} options={permissoes} onChange={formik.handleChange} optionLabel="permissao.nome" placeholder="Selecione as Permissões" />
                             </div>
                         </form>
                     </Dialog>
@@ -298,8 +296,6 @@ const Pessoa = () => {
                             {objeto && <span>Deseja Excluir?</span>}
                         </div>
                     </Dialog>
-
-
                 </div>
             </div>
         </div>
