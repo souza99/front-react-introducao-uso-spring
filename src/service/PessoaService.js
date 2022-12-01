@@ -1,8 +1,8 @@
 import axios from "axios";
 import {LoginService} from "./LoginService";
 
-export class PermissaoService {
-    url = 'http://localhost:8080/api/permissao';
+export class PessoaService {
+    url = 'http://localhost:8080/api/pessoa';
 
     constructor() {
         this.inicializarAxios();

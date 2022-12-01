@@ -1,8 +1,8 @@
-import axios from "axios";
+import axios from 'axios';
 import {LoginService} from "./LoginService";
 
-export class PermissaoService {
-    url = 'http://localhost:8080/api/permissao';
+export class ProdutoImagensService {
+    url = 'http://localhost:8080/api/imagem';
 
     constructor() {
         this.inicializarAxios();
@@ -39,19 +39,24 @@ export class PermissaoService {
         });
     }
 
-    listarTodos() {
-        return this.axiosInstance.get(this.url);
+    salvarImagem(obj) {
+        const formData = new FormData();
+
+        formData.append('idProduto', obj.idProduto);
+        formData.append('arquivo', obj.file);
+        const config = {
+            headers: {
+                'content-type': 'multipart/form-data'
+            }
+        }
+        return this.axiosInstance.post(this.url + "/cadastrar", formData, config);
     }
 
-    salvar(objeto) {
-        return this.axiosInstance.post(this.url + '/salvar', objeto);
+    buscarPorProdutoId(idProduto) {
+        return this.axiosInstance.get(this.url + "/produto/" + idProduto);
     }
 
-    editar(objeto) {
-        return this.axiosInstance.put(this.url + '/editar/' + objeto.id, objeto);
-    }
-
-    excluir(id) {
-        return this.axiosInstance.delete(this.url + '/excluir/' + id);
+    excluir(idProduto) {
+        return this.axiosInstance.delete(this.url + "/excluir/" + idProduto);
     }
 }

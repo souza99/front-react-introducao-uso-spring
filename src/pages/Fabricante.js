@@ -56,13 +56,13 @@ const Fabricante = () => {
         if (objeto.nome.trim()) {
             let _objeto = { ...objeto };
             if (objeto.id) {
-                objetoService.alterar(_objeto).then(data => {
+                objetoService.editar(_objeto).then(data => {
                     toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Alterado com Sucesso', life: 3000 });
                     setObjetos(null);
                 });
             }
             else {
-                objetoService.inserir(_objeto).then(data => {
+                objetoService.salvar(_objeto).then(data => {
                     toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Inserido com Sucesso', life: 3000 });
                     setObjetos(null);
                 });

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { LoginService } from "./LoginService";
+import {LoginService} from "./LoginService";
 
 export class EstadoService {
     url = 'http://localhost:8080/api/estado';
@@ -15,11 +15,11 @@ export class EstadoService {
         });
 
         this.axiosInstance.interceptors.request.use((config) => {
-            const token = new LoginService().getToken();
-            const authRequestToken = token ? `Bearer ${token}` : '';
-            config.headers.common['Authorization'] = authRequestToken;
-            return config;
-        },
+                const token = new LoginService().getToken();
+                const authRequestToken = token ? `Bearer ${token}` : '';
+                config.headers.common['Authorization'] = authRequestToken;
+                return config;
+            },
             (error) => Promise.reject(error)
         );
     }
@@ -30,7 +30,7 @@ export class EstadoService {
         }, (erro) => {
             console.log(erro.response.status);
             if (erro.response.status === 401) {
-                if (!erro.request.response.includes("gerenciamento/login")) {
+                if (!erro.request.response.includes("gerenciamento-usuario/login")) {
                     new LoginService().sair();
                     window.location.href = "/";
                 }
@@ -43,15 +43,15 @@ export class EstadoService {
         return this.axiosInstance.get(this.url);
     }
 
-    inserir(objeto) {
-        return this.axiosInstance.post(this.url + '/cadastrar', objeto);
+    salvar(objeto) {
+        return this.axiosInstance.post(this.url + '/salvar', objeto);
     }
 
-    alterar(objeto) {
-        return this.axiosInstance.put(this.url + '/atualizar/' + objeto.id, objeto);
+    editar(objeto) {
+        return this.axiosInstance.put(this.url + '/editar/' + objeto.id, objeto);
     }
 
     excluir(id) {
-        return this.axiosInstance.delete(this.url + '/deletar/' + id);
+        return this.axiosInstance.delete(this.url + '/excluir/' + id);
     }
 }

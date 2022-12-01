@@ -1,8 +1,8 @@
 import axios from "axios";
 import {LoginService} from "./LoginService";
 
-export class PermissaoService {
-    url = 'http://localhost:8080/api/permissao';
+export class MarcaService {
+    url = 'http://localhost:8080/api/marca';
 
     constructor() {
         this.inicializarAxios();
@@ -52,6 +52,6 @@ export class PermissaoService {
     }
 
     excluir(id) {
-        return this.axiosInstance.delete(this.url + '/excluir/' + id);
+        return this.axiosInstance.delete(this.url + '/deletar/' + id);
     }
 }

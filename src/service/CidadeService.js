@@ -30,7 +30,7 @@ export class CidadeService {
         }, (erro) => {
             console.log(erro.response.status);
             if (erro.response.status === 401) {
-                if (!erro.request.response.includes("gerenciamento/login")) {
+                if (!erro.request.response.includes("gerenciamento-usuario/login")) {
                     new LoginService().sair();
                     window.location.href = "/";
                 }
@@ -43,12 +43,12 @@ export class CidadeService {
         return this.axiosInstance.get(this.url);
     }
 
-    inserir(objeto) {
-        return this.axiosInstance.post(this.url + '/cadastrar', objeto);
+    salvar(objeto) {
+        return this.axiosInstance.post(this.url + '/salvar', objeto);
     }
 
-    alterar(objeto) {
-        return this.axiosInstance.put(this.url + '/atualizar/' + objeto.id, objeto);
+    editar(objeto) {
+        return this.axiosInstance.put(this.url + '/editar/' + objeto.id, objeto);
     }
 
     excluir(id) {
