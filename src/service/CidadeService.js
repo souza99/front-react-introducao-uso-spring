@@ -1,8 +1,8 @@
-import axios from "axios";
+import axios from 'axios';
 import { LoginService } from "./LoginService";
 
-export class CategoriaService {
-    url = 'http://localhost:8080/api/categoria';
+export class CidadeService {
+    url = 'http://localhost:8080/api/cidade';
 
     constructor() {
         this.inicializarAxios();
@@ -40,19 +40,18 @@ export class CategoriaService {
     }
 
     listarTodos() {
-
         return this.axiosInstance.get(this.url);
     }
 
-    salvar(objeto) {
-        return this.axiosInstance.post(this.url + '/salvar', objeto);
+    inserir(objeto) {
+        return this.axiosInstance.post(this.url + '/cadastrar', objeto);
     }
 
-    editar(objeto) {
-        return this.axiosInstance.put(this.url + '/editar/' + objeto.id, objeto);
+    alterar(objeto) {
+        return this.axiosInstance.put(this.url + '/atualizar/' + objeto.id, objeto);
     }
 
     excluir(id) {
-        return this.axiosInstance.delete(this.url + '/excluir/' + id);
+        return this.axiosInstance.delete(this.url + '/deletar/' + id);
     }
 }

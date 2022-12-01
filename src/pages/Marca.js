@@ -1,16 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
-import { Toolbar } from 'primereact/toolbar';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
-import { CategoriaService } from '../service/CategoriaService';
+import { Toast } from 'primereact/toast';
+import { Toolbar } from 'primereact/toolbar';
+import React, { useEffect, useRef, useState } from 'react';
+import { MarcaService } from '../service/MarcaService';
 import ColunaOpcoes from "../components/ColunaOpcoes";
 
-const Categoria = () => {
+const Marca = () => {
     let objetoNovo = {
         nome: ''
     };
@@ -23,7 +23,7 @@ const Categoria = () => {
     const [globalFilter, setGlobalFilter] = useState(null);
     const toast = useRef(null);
     const dt = useRef(null);
-    const objetoService = new CategoriaService();
+    const objetoService = new MarcaService();
 
     useEffect(() => {
         if (objetos == null) {
@@ -195,4 +195,4 @@ const comparisonFn = function (prevProps, nextProps) {
     return prevProps.location.pathname === nextProps.location.pathname;
 };
 
-export default React.memo(Categoria, comparisonFn);
+export default React.memo(Marca, comparisonFn);

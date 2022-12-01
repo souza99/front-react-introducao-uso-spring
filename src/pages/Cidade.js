@@ -1,21 +1,25 @@
-import React, { useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
-import { Toolbar } from 'primereact/toolbar';
+import { Column } from 'primereact/column';
+import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
+import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
-import { CategoriaService } from '../service/CategoriaService';
+import { Toast } from 'primereact/toast';
+import { Toolbar } from 'primereact/toolbar';
+import React, { useEffect, useRef, useState } from 'react';
+import { CidadeService } from '../service/CidadeService';
+import { EstadoService } from '../service/EstadoService';
 import ColunaOpcoes from "../components/ColunaOpcoes";
 
-const Categoria = () => {
+const Cidade = () => {
     let objetoNovo = {
-        nome: ''
+        nome: '',
+        estado: ''
     };
 
     const [objetos, setObjetos] = useState(null);
+    const [estados, setEstados] = useState(null);
     const [objetoDialog, setObjetoDialog] = useState(false);
     const [objetoDeleteDialog, setObjetoDeleteDialog] = useState(false);
     const [objeto, setObjeto] = useState(objetoNovo);
@@ -23,13 +27,19 @@ const Categoria = () => {
     const [globalFilter, setGlobalFilter] = useState(null);
     const toast = useRef(null);
     const dt = useRef(null);
-    const objetoService = new CategoriaService();
+    const objetoService = new CidadeService();
+    const estadoService = new EstadoService();
+
+    useEffect(() => {
+        estadoService.listarTodos().then(res => {
+            setEstados(res.data);
+        });
+    }, []);
 
     useEffect(() => {
         if (objetos == null) {
             objetoService.listarTodos().then(res => {
                 setObjetos(res.data)
-
             });
         }
     }, [objetos]);
@@ -82,6 +92,7 @@ const Categoria = () => {
     }
 
     const deleteObjeto = () => {
+
         objetoService.excluir(objeto.id).then(data => {
             toast.current.show({ severity: 'success', summary: 'Sucesso', detail: 'Removido', life: 3000 });
 
@@ -103,8 +114,7 @@ const Categoria = () => {
         return (
             <React.Fragment>
                 <div className="my-2">
-                    <Button label="Nova" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
-
+                    <Button label="Nova Cidade" icon="pi pi-plus" className="p-button-success mr-2" onClick={openNew} />
                 </div>
             </React.Fragment>
         )
@@ -128,9 +138,18 @@ const Categoria = () => {
         );
     }
 
+    const estadoBodyTemplate = (rowData) => {
+        return (
+            <>
+                <span className="p-column-title">Estado</span>
+                {rowData.estado && (rowData.estado.nome + '/' + rowData.estado.sigla)}
+            </>
+        );
+    }
+
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Registros Cadastrados</h5>
+            <h5 className="m-0">Cidades Cadastradas</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" onInput={(e) => setGlobalFilter(e.target.value)} placeholder="Buscar..." />
@@ -166,6 +185,7 @@ const Categoria = () => {
                         globalFilter={globalFilter} emptyMessage="Sem objetos cadastrados." header={header} responsiveLayout="scroll">
                         <Column field="id" header="ID" sortable body={idBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
                         <Column field="nome" header="Nome" sortable body={nomeBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
+                        <Column field="estado" header="Estado" body={estadoBodyTemplate} headerStyle={{ width: '14%', minWidth: '10rem' }}></Column>
                         <Column body={rowData => {
                             return <ColunaOpcoes rowData={rowData} editObjeto={editObjeto} confirmDeleteObjeto={confirmDeleteObjeto} />
                         }}></Column>
@@ -176,6 +196,11 @@ const Categoria = () => {
                             <label htmlFor="nome">Nome</label>
                             <InputText id="nome" value={objeto.nome} onChange={(e) => onInputChange(e, 'nome')} required autoFocus className={classNames({ 'p-invalid': submitted && !objeto.nome })} />
                             {submitted && !objeto.name && <small className="p-invalid">Nome é Obrigatório.</small>}
+                        </div>
+
+                        <div className="field">
+                            <label htmlFor="nome">Estado</label>
+                            <Dropdown optionLabel="nome" value={objeto.estado} options={estados} filter onChange={(e) => onInputChange(e, 'estado')} placeholder="Selecione um Estado" />
                         </div>
                     </Dialog>
 
@@ -195,4 +220,4 @@ const comparisonFn = function (prevProps, nextProps) {
     return prevProps.location.pathname === nextProps.location.pathname;
 };
 
-export default React.memo(Categoria, comparisonFn);
+export default React.memo(Cidade, comparisonFn);
